@@ -112,6 +112,15 @@
             justify-content: space-between;
             width: 80%;
             margin-top: 1rem;
+            position: relative;
+            height: 50px;
+        }
+
+        .nav-button#move-next.corner-position {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            margin: 0;
         }
         
         .nav-button {
@@ -632,10 +641,12 @@
                 // Reset button display
                 prevButton.style.display = 'none';
                 nextButton.style.display = 'none';
+                nextButton.classList.remove('corner-position');
                 
                 // First folder - only show next button
                 if (folderIndex === 0) {
                     nextButton.style.display = 'block';
+                    nextButton.classList.add('corner-position');
                 } 
                 // Last folder - only show prev button
                 else if (folderIndex === folderOrder.length - 1) {
