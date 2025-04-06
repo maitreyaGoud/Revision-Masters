@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revision Masters</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        header {
+            background-color: #4a6fa5;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-title {
+            flex-grow: 1;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .folder-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .folder {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .folder:hover {
+            transform: translateY(-5px);
+        }
+        
+        .folder-icon {
+            font-size: 3rem;
+            color: #4a6fa5;
+            margin-bottom: 1rem;
+        }
+        
+        .folder-name {
+            font-weight: bold;
+        }
+        
+        .folder-count {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
+        /* Image viewer styles */
+        .image-viewer {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 10;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .image-container {
+            position: relative;
+            width: 80%;
+            height: 70%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .viewer-buttons {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            margin-top: 1rem;
+        }
+        
+        .nav-button {
+            background-color: #4a6fa5;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 0.5rem;
+        }
+        
+        .nav-button:hover {
+            background-color: #385d8a;
+        }
+        
+        .close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .close-button:hover {
+            background-color: #c0392b;
+        }
+        
+        /* Pomodoro Timer Styles */
+        .pomodoro-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .timer-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+        }
+        
+        .timer-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .timer-button {
+            background-color: white;
+            color: #4a6fa5;
+            border: none;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
+        .timer-button:hover {
+            background-color: #f0f0f0;
+        }
+        
+        /* Loading indicator */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 4px;
+            z-index: 20;
+        }
+        
+        /* File input button */
+        .file-input-container {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        #file-input {
+            display: none;
+        }
+        
+        .file-input-label {
+            background-color: #4a6fa5;
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+        }
+        
+        .file-input-label:hover {
+            background-color: #385d8a;
+        }
+        
+        /* Theme Switch */
+        .theme-switch {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            display: flex;
+            align-items: center;
+            color: white;
+        }
+        
+        .theme-switch label {
+            margin-right: 0.5rem;
+        }
+        
+        /* Dark mode */
+        body.dark-mode {
+            background-color: #222;
+            color: #f5f5f5;
+        }
+        
+        body.dark-mode .folder {
+            background-color: #333;
+            color: #f5f5f5;
+        }
+        
+        body.dark-mode .folder-count {
+            color: #aaa;
+        }
+        
+        body.dark-mode .timer-button {
+            background-color: #444;
+            color: #f5f5f5;
+        }
+        
+        body.dark-mode .timer-button:hover {
+            background-color: #555;
+        }
+        
+        /* For drag and drop */
+        .drag-over {
+            border: 2px dashed #4a6fa5;
+            background-color: rgba(74, 111, 165, 0.1);
+        }
+
+        /* Status message */
+        .status-message {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="theme-switch">
+            <label for="dark-mode-toggle">Dark Mode:</label>
+            <input type="checkbox" id="dark-mode-toggle">
+        </div>
+        
+        <div class="header-title">
+            <h1>Revision Masters</h1>
+        </div>
+        
+        <div class="pomodoro-container">
+            <div class="timer-display">25:00</div>
+            <div class="timer-buttons">
+                <button class="timer-button" id="start-timer">Start</button>
+                <button class="timer-button" id="reset-timer">Reset</button>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="file-input-container">
+            <label for="file-input" class="file-input-label">Select Images to Upload</label>
+            <input type="file" id="file-input" accept="image/*" multiple>
+        </div>
+        
+        <div class="folder-grid">
+            <div class="folder" data-folder="Daily">
+                <div class="folder-icon">📁</div>
+                <div class="folder-name">Daily</div>
+                <div class="folder-count" id="count-Daily">0 images</div>
+            </div>
+            
+            <div class="folder" data-folder="Mon-Wed-Fri">
+                <div class="folder-icon">📁</div>
+                <div class="folder-name">Mon-Wed-Fri</div>
+                <div class="folder-count" id="count-Mon-Wed-Fri">0 images</div>
+            </div>
+            
+            <div class="folder" data-folder="Mon-Thu">
+                <div class="folder-icon">📁</div>
+                <div class="folder-name">Mon-Thu</div>
+                <div class="folder-count" id="count-Mon-Thu">0 images</div>
+            </div>
+            
+            <div class="folder" data-folder="Sunday">
+                <div class="folder-icon">📁</div>
+                <div class="folder-name">Sunday</div>
+                <div class="folder-count" id="count-Sunday">0 images</div>
+            </div>
+            
+            <div class="folder" data-folder="1st-16th">
+                <div class="folder-icon">📁</div>
+                <div class="folder-name">1st-16th</div>
+                <div class="folder-count" id="count-1st-16th">0 images</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="image-viewer" id="image-viewer">
+        <button class="close-button" id="close-viewer">✕</button>
+        <div class="image-container" id="image-container">
+            <img id="current-image" src="" alt="Image Preview">
+        </div>
+        <div class="viewer-buttons" id="viewer-buttons">
+            <button class="nav-button" id="move-prev" style="display: none;">Move to Previous Box</button>
+            <button class="nav-button" id="move-next" style="display: none;">Move to Next Box</button>
+        </div>
+    </div>
+    
+    <div class="loading" id="loading">Processing...</div>
+    <div class="status-message" id="status-message"></div>
+    
+    <script>
+        // Define the folders in order
+        const folderOrder = ['Daily', 'Mon-Wed-Fri', 'Mon-Thu', 'Sunday', '1st-16th'];
+        
+        // Object to store images by folder
+        let imagesByFolder = {};
+        
+        // IndexedDB setup
+        let db;
+        const DB_NAME = 'ImageOrganizerDB';
+        const DB_VERSION = 1;
+        
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains('images')) {
+                        db.createObjectStore('images', { keyPath: 'id' });
+                    }
+                };
+                
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    resolve(db);
+                };
+                
+                request.onerror = (event) => {
+                    reject('Error opening database');
+                    showStatus('Database error: ' + event.target.error);
+                };
+            });
+        }
+        
+        // Show status message
+        function showStatus(message, duration = 3000) {
+            const statusElement = document.getElementById('status-message');
+            statusElement.textContent = message;
+            statusElement.style.display = 'block';
+            
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, duration);
+        }
+        
+        // Initialize storage
+        async function initStorage() {
+            folderOrder.forEach(folder => {
+                if (!imagesByFolder[folder]) {
+                    imagesByFolder[folder] = [];
+                }
+            });
+            
+            try {
+                await openDB();
+                
+                // Load from IndexedDB
+                const transaction = db.transaction(['images'], 'readonly');
+                const store = transaction.objectStore('images');
+                const request = store.getAll();
+                
+                request.onsuccess = () => {
+                    const allImages = request.result || [];
+                    
+                    // Group images by folder
+                    folderOrder.forEach(folder => {
+                        imagesByFolder[folder] = allImages.filter(img => img.folder === folder);
+                    });
+                    
+                    updateImageCounts();
+                    showStatus(`Loaded ${allImages.length} images successfully`);
+                };
+                
+                request.onerror = (event) => {
+                    console.error('Error loading data:', event.target.error);
+                    showStatus('Error loading images');
+                };
+            } catch (error) {
+                console.error('Database initialization error:', error);
+                showStatus('Database initialization error');
+            }
+        }
+        
+        // Save data to IndexedDB
+        async function saveData() {
+            try {
+                // Create a transaction and get object store
+                const transaction = db.transaction(['images'], 'readwrite');
+                const store = transaction.objectStore('images');
+                
+                // Clear existing data
+                const clearRequest = store.clear();
+                
+                clearRequest.onsuccess = () => {
+                    // Add all images from all folders
+                    let totalImages = 0;
+                    
+                    for (const folder of folderOrder) {
+                        if (imagesByFolder[folder]) {
+                            for (const image of imagesByFolder[folder]) {
+                                image.folder = folder; // Ensure folder is set
+                                store.add(image);
+                                totalImages++;
+                            }
+                        }
+                    }
+                    
+                    transaction.oncomplete = () => {
+                        updateImageCounts();
+                        console.log(`Saved ${totalImages} images to database`);
+                    };
+                    
+                    transaction.onerror = (event) => {
+                        console.error('Transaction error:', event.target.error);
+                        showStatus('Error saving data');
+                    };
+                };
+            } catch (error) {
+                console.error('Error saving data:', error);
+                showStatus('Error saving data');
+            }
+        }
+        
+        // Update image counts for each folder
+        function updateImageCounts() {
+            folderOrder.forEach(folder => {
+                const count = imagesByFolder[folder] ? imagesByFolder[folder].length : 0;
+                document.getElementById(`count-${folder}`).textContent = `${count} images`;
+            });
+        }
+        
+        // Image compression function
+        function compressImage(dataUrl, maxWidth = 1000) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    // Don't resize if already smaller than max width
+                    if (img.width <= maxWidth) {
+                        resolve(dataUrl);
+                        return;
+                    }
+                    
+                    const canvas = document.createElement('canvas');
+                    const ratio = maxWidth / img.width;
+                    canvas.width = maxWidth;
+                    canvas.height = img.height * ratio;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    // Compress with reduced quality
+                    resolve(canvas.toDataURL('image/jpeg', 0.7));
+                };
+                img.src = dataUrl;
+            });
+        }
+        
+        // Handle file uploads
+        document.getElementById('file-input').addEventListener('change', async (e) => {
+            const files = e.target.files;
+            if (!files || files.length === 0) return;
+            
+            document.getElementById('loading').style.display = 'block';
+            showStatus(`Processing ${files.length} files...`);
+            
+            // Process files in batches to prevent browser freezing
+            const batchSize = 10;
+            let processedCount = 0;
+            
+            for (let i = 0; i < files.length; i += batchSize) {
+                const batch = Array.from(files).slice(i, i + batchSize);
+                
+                // Process batch
+                await Promise.all(batch.map(async (file) => {
+                    if (!file.type.startsWith('image/')) return;
+                    
+                    // Process image
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = async (event) => {
+                            try {
+                                // Compress the image before storing
+                                const compressedData = await compressImage(event.target.result);
+                                
+                                const imageData = {
+                                    id: Date.now() + Math.random().toString(36).substr(2, 9),
+                                    name: file.name,
+                                    data: compressedData,
+                                    folder: 'Daily' // Default folder
+                                };
+                                
+                                // Add image to the "Daily" folder by default
+                                if (!imagesByFolder['Daily']) {
+                                    imagesByFolder['Daily'] = [];
+                                }
+                                imagesByFolder['Daily'].push(imageData);
+                                processedCount++;
+                                resolve();
+                            } catch (error) {
+                                console.error('Error processing image:', error);
+                                resolve();
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }));
+                
+                // Save after each batch and allow UI to update
+                await saveData();
+                
+                // Update progress
+                showStatus(`Processed ${Math.min(i + batchSize, files.length)} of ${files.length} images`);
+                
+                // Allow UI to refresh
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
+            
+            document.getElementById('loading').style.display = 'none';
+            showStatus(`Successfully added ${processedCount} images`);
+            e.target.value = '';
+        });
+        
+        // Handle folder clicks
+        document.querySelectorAll('.folder').forEach(folder => {
+            folder.addEventListener('click', () => {
+                const folderName = folder.dataset.folder;
+                openFolder(folderName);
+            });
+            
+            // Setup drag and drop
+            folder.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                folder.classList.add('drag-over');
+            });
+            
+            folder.addEventListener('dragleave', () => {
+                folder.classList.remove('drag-over');
+            });
+            
+            folder.addEventListener('drop', (e) => {
+                e.preventDefault();
+                folder.classList.remove('drag-over');
+                const sourceData = JSON.parse(e.dataTransfer.getData('application/json'));
+                moveImage(sourceData.imageId, sourceData.currentFolder, folder.dataset.folder);
+            });
+        });
+        
+        // Open a folder and display its images
+        function openFolder(folderName) {
+            const currentFolder = folderName;
+            const images = imagesByFolder[currentFolder] || [];
+            
+            if (images.length === 0) {
+                showStatus(`No images in ${folderName} folder`);
+                return;
+            }
+            
+            let currentIndex = 0;
+            showImage(currentIndex);
+            
+            function showImage(index) {
+                if (index < 0 || index >= images.length) return;
+                
+                const imageViewer = document.getElementById('image-viewer');
+                const currentImage = document.getElementById('current-image');
+                const prevButton = document.getElementById('move-prev');
+                const nextButton = document.getElementById('move-next');
+                
+                currentImage.src = images[index].data;
+                currentImage.setAttribute('data-id', images[index].id);
+                
+                // Configure buttons based on folder position
+                const folderIndex = folderOrder.indexOf(currentFolder);
+                
+                // Reset button display
+                prevButton.style.display = 'none';
+                nextButton.style.display = 'none';
+                
+                // First folder - only show next button
+                if (folderIndex === 0) {
+                    nextButton.style.display = 'block';
+                } 
+                // Last folder - only show prev button
+                else if (folderIndex === folderOrder.length - 1) {
+                    prevButton.style.display = 'block';
+                } 
+                // Middle folders - show both buttons
+                else {
+                    prevButton.style.display = 'block';
+                    nextButton.style.display = 'block';
+                }
+                
+                // Update navigation functions
+                prevButton.onclick = () => {
+                    const prevFolder = folderOrder[folderIndex - 1];
+                    const imageId = currentImage.getAttribute('data-id');
+                    moveImage(imageId, currentFolder, prevFolder);
+                    
+                    // Show next image or close if none left
+                    if (images.length > 1) {
+                        const newIndex = index >= images.length - 1 ? 0 : index;
+                        showImage(newIndex);
+                    } else {
+                        imageViewer.style.display = 'none';
+                    }
+                };
+                
+                nextButton.onclick = () => {
+                    const nextFolder = folderOrder[folderIndex + 1];
+                    const imageId = currentImage.getAttribute('data-id');
+                    moveImage(imageId, currentFolder, nextFolder);
+                    
+                    // Show next image or close if none left
+                    if (images.length > 1) {
+                        const newIndex = index >= images.length - 1 ? 0 : index;
+                        showImage(newIndex);
+                    } else {
+                        imageViewer.style.display = 'none';
+                    }
+                };
+                
+                // Make image draggable
+                currentImage.setAttribute('draggable', 'true');
+                currentImage.ondragstart = (e) => {
+                    const data = {
+                        imageId: images[index].id,
+                        currentFolder: currentFolder
+                    };
+                    e.dataTransfer.setData('application/json', JSON.stringify(data));
+                };
+                
+                imageViewer.style.display = 'flex';
+            }
+            
+            // Close button
+            document.getElementById('close-viewer').onclick = () => {
+                document.getElementById('image-viewer').style.display = 'none';
+            };
+        }
+        
+        // Move image between folders
+        async function moveImage(imageId, sourceFolder, targetFolder) {
+            if (sourceFolder === targetFolder) return;
+            
+            const sourceImages = imagesByFolder[sourceFolder] || [];
+            const imageIndex = sourceImages.findIndex(img => img.id === imageId);
+            
+            if (imageIndex === -1) return;
+            
+            // Get the image
+            const image = sourceImages[imageIndex];
+            
+            // Remove from source folder
+            sourceImages.splice(imageIndex, 1);
+            
+            // Add to target folder
+            if (!imagesByFolder[targetFolder]) {
+                imagesByFolder[targetFolder] = [];
+            }
+            
+            // Update folder property
+            image.folder = targetFolder;
+            imagesByFolder[targetFolder].push(image);
+            
+            // Save changes
+            await saveData();
+            showStatus(`Moved image to ${targetFolder}`);
+        }
+        
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        const savedTheme = localStorage.getItem('theme');
+        
+        if (savedTheme === 'dark' || (!savedTheme && prefersDarkScheme.matches)) {
+            document.body.classList.add('dark-mode');
+            darkModeToggle.checked = true;
+        }
+        
+        darkModeToggle.addEventListener('change', () => {
+            document.body.classList.toggle('dark-mode');
+            const theme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+            localStorage.setItem('theme', theme);
+        });
+        
+        // Pomodoro Timer
+        const timerDisplay = document.querySelector('.timer-display');
+        const startButton = document.getElementById('start-timer');
+        const resetButton = document.getElementById('reset-timer');
+        let timerDuration = 25 * 60; // 25 minutes in seconds
+        let timerInterval;
+        let timerRunning = false;
+        
+        function updateTimerDisplay(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+        
+        function startTimer() {
+            if (timerRunning) {
+                clearInterval(timerInterval);
+                startButton.textContent = 'Start';
+                timerRunning = false;
+                return;
+            }
+            
+            startButton.textContent = 'Pause';
+            timerRunning = true;
+            
+            timerInterval = setInterval(() => {
+                timerDuration--;
+                updateTimerDisplay(timerDuration);
+                
+                if (timerDuration <= 0) {
+                    clearInterval(timerInterval);
+                    showStatus('Time is up! Take a break.', 5000);
+                    timerDuration = 25 * 60;
+                    updateTimerDisplay(timerDuration);
+                    startButton.textContent = 'Start';
+                    timerRunning = false;
+                }
+            }, 1000);
+        }
+        
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerDuration = 25 * 60;
+            updateTimerDisplay(timerDuration);
+            startButton.textContent = 'Start';
+            timerRunning = false;
+        }
+        
+        startButton.addEventListener('click', startTimer);
+        resetButton.addEventListener('click', resetTimer);
+        
+        // Initialize the application
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await initStorage();
+                updateTimerDisplay(timerDuration);
+                showStatus('Application initialized successfully');
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showStatus('Error initializing application');
+            }
+        });
+    </script>
+</body>
+</html>
