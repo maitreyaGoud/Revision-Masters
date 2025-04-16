@@ -1,0 +1,50 @@
+<!DOCTYPE html><html>
+<! Head><head>
+<title>Revision Masters, Palamuru : Interactive EEE Workbook</title>
+<! Import MathJaX><script
+type="text/javascript" 
+id="MathJax-script" 
+async 
+src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+                  </script>
+<! Dynamic Cloze oneLiner Script><script> 
+function NoteoneLiner(containerId, Part1, Part2, Part3) {
+      const container = document.getElementById(containerId);
+      const oneLinerstionDiv = document.createElement("div");
+      oneLinerstionDiv.innerHTML = `
+        <p>${Part1}
+          <span>
+            <button 
+              class="toggle" 
+              onclick="this.style.display='none';
+              this.nextElementSibling.style.display='inline';">
+              Show Ans</button>
+            <button 
+              class="hidden toggle" 
+              style="display:none;" 
+              onclick="this.style.display='none';
+              this.previousElementSibling.style.display='inline';">
+              ${Part2}</button></span>
+          ${Part3}</p>
+      `;
+      container.appendChild(oneLinerstionDiv);
+    }
+                              </script>
+        </head>
+<! Body><body>
+<! Book><div class="book">
+<! Chapter1><div class="chapter"><h1>Chapter 1: Field Theory</h1>
+  <details><summary>Open Field Theory Notes</summary><div id="ft"></div><script>
+NoteoneLiner("ft", "1. Damn this is fun", "\\( R = \\frac{V}{I} \\)",", at Constant Temperature");
+NoteoneLiner("ft", "2. Yes indeed it is", "\\( R = \\frac{V}{I} \\)", "Conservation Laws Holds Good");
+                         </script>
+            </div><! Chapter1>
+<! Chapter2><div class="chapter"><h1>Chapter 2: Circuit Theory</h1>
+ <details><summary>Open Circuit Theory Notes</summary><div id="ct"></div><script>
+NoteoneLiner("ct", "1. Ohm's Law is Defined as", "\\( R = \\frac{V}{I} \\)",", at Constant Temperature");
+NoteoneLiner("ct", "2. Kirchoff's Law is", "\\( R = \\frac{V}{I} \\)", "Conservation Laws Holds Good");
+                         </script>
+              </div><! Chapter2>
+        </div><! Book>
+        </body><! Body>
+</html>
